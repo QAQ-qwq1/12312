@@ -10,14 +10,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 1. 配置 Java 环境 (Android 构建必须)
+      # 1. 配置 Java 环境
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 2. 安装系统依赖 (模拟 Colab 环境)
+      # 2. 安装系统依赖
       - name: Install System Dependencies
         run: |
           sudo apt-get update
@@ -46,19 +46,16 @@ jobs:
             libtool \
             pkg-config
 
-      # 3. 安装 Buildozer 和 Cython
+      # 3. 安装 Buildozer
       - name: Install Buildozer
         run: |
           pip3 install --upgrade pip
-          pip3 install --upgrade buildozer cython
+          pip3 install --upgrade buildozer cython numpy
 
       # 4. 开始打包
-      # 使用 'yes' 命令自动同意所有 License 提示
+      # 【关键修改】去掉了 buildozer android clean
       - name: Build with Buildozer
         run: |
-          # 强制清理一次，防止缓存错误
-          buildozer android clean
-          # 开始编译，yes | 用于自动接受 SDK 协议
           yes | buildozer android debug
 
       # 5. 上传 APK
