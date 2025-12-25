@@ -8,28 +8,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      # 更新为 v4
+      - uses: actions/checkout@v4
 
-      # 1. 缓存依赖，加快下次打包速度
+      # 1. 缓存依赖
       - name: Get Date
         id: get-date
         run: |
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+          echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
         shell: bash
 
+      # 更新为 v4
       - name: Cache Buildozer global directory
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: .buildozer_global
           key: buildozer-global-${{ hashFiles('buildozer.spec') }}
 
+      # 更新为 v4
       - name: Cache Buildozer directory
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: .buildozer
           key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
 
       # 2. 安装并运行 Buildozer
+      # 注意：buildozer action 自身通常不需要频繁手动更新版本，但为了保险起见，保持 v1 即可
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
@@ -38,8 +42,9 @@ jobs:
           buildozer_version: master
 
       # 3. 上传打包好的 APK
+      # 更新为 v4
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: package
           path: ${{ steps.buildozer.outputs.filename }}
