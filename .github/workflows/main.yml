@@ -8,24 +8,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 更新为 v4
       - uses: actions/checkout@v4
 
-      # 1. 缓存依赖
+      # 1. 缓存依赖 (这一步能显著加快后续打包速度)
       - name: Get Date
         id: get-date
         run: |
           echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
         shell: bash
 
-      # 更新为 v4
       - name: Cache Buildozer global directory
         uses: actions/cache@v4
         with:
           path: .buildozer_global
           key: buildozer-global-${{ hashFiles('buildozer.spec') }}
 
-      # 更新为 v4
       - name: Cache Buildozer directory
         uses: actions/cache@v4
         with:
@@ -33,18 +30,18 @@ jobs:
           key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
 
       # 2. 安装并运行 Buildozer
-      # 注意：buildozer action 自身通常不需要频繁手动更新版本，但为了保险起见，保持 v1 即可
+      # 【关键修改】更换为 HeaTTheatR 维护的 Action，修复权限错误
       - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
+        uses: HeaTTheatR/buildozer-action@v1
         id: buildozer
         with:
           command: buildozer android debug
-          buildozer_version: master
+          buildozer_version: current  # 使用当前稳定版
 
       # 3. 上传打包好的 APK
-      # 更新为 v4
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: package
+          # 注意：HeaTTheatR 的输出路径变量略有不同，但通常也是 filename
           path: ${{ steps.buildozer.outputs.filename }}
